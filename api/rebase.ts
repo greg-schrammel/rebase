@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { providers, Wallet, Contract } from "ethers";
-import { parseEther } from "ethers/lib/utils";
+import { formatUnits, parseEther } from "ethers/lib/utils";
 import createFetch from "@vercel/fetch";
 const fetch = createFetch();
 
@@ -72,9 +72,11 @@ export default async function (req: VercelRequest, res: VercelResponse) {
 
     const gasEstimation = await StakingContract.estimateGas.rebase();
     const cnvPriceGwei = await fetchCnvPriceGwei();
-
+    const incentiveValue =
+      +formatUnits(rebaseIncentive, 18) * cnvPriceGwei.toNumber();
     const txPrice = gasEstimation.mul(gasPrice);
-    if (txPrice.gt(cnvPriceGwei)) {
+
+    if (txPrice.gt(incentiveValue)) {
       await scheduleRebase(Date.now() / 1000 + 5 * 60);
       return res.status(200).send(`gass too high retrying in 5 min`);
     }
