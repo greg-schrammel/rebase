@@ -1,0 +1,14 @@
+{
+  "name": "rebase",
+  "version": "1.0.0",
+  "repository": "https://github.com/greg-schrammel/rebase.git",
+  "author": "gregs <ukfaeku@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@flashbots/ethers-provider-bundle": "^0.4.3",
+    "@vercel/fetch": "^6.2.0",
+    "@vercel/node": "^1.15.4",
+    "ethers": "^5.6.8",
+    "vercel": "^24.2.5"
+  }
+}
