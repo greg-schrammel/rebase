@@ -21,7 +21,7 @@ const StakingContract = new Contract(
 );
 
 const rebaseUrl = "https://concave-stake-rebase.vercel.app/api/rebase";
-const zeploKey = "IOgvyDijv2HzVE9EC6nsq6mF9ESNpfff6J8Jxw";
+const zeploKey = process.env.ZEPLO_KEY;
 
 const scheduleRebase = async (nextRebaseTimestamp) => {
   // will retry 3 times spaced 5 secs on failed request
