@@ -76,7 +76,7 @@ export default async function (req: VercelRequest, res: VercelResponse) {
     const incentiveValue = cnvPriceGwei.mul(+formatUnits(rebaseIncentive, 18));
     const txPrice = gasEstimation.mul(gasPrice);
 
-    if (txPrice.mul(0.75).gt(incentiveValue)) {
+    if (txPrice.gt(incentiveValue)) {
       await scheduleRebase(Date.now() / 1000 + 5 * 60);
       return res.status(200).send(`gass too high retrying in 5 min`);
     }
