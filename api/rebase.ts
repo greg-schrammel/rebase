@@ -55,7 +55,7 @@ export default async function (req: VercelRequest, res: VercelResponse) {
     if (nextRebaseTime.gte(block.timestamp)) {
       // called too early
       // maybe check if there is a schedule for the next rebase
-      res.send(`it's not time yet`);
+      res.status(500).send(`it's not time yet`);
       return;
     }
 
