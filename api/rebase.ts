@@ -78,7 +78,13 @@ export default async function (req: VercelRequest, res: VercelResponse) {
 
     if (txPrice.gt(incentiveValue)) {
       await scheduleRebase(Date.now() / 1000 + 5 * 60);
-      return res.status(200).send(`gass too high retrying in 5 min`);
+      return res.status(200).send(`
+        gas too high retrying in 5 min
+
+        CNV price: ${cnvPriceGwei.toString()} gwei
+        CNV rebase incentive: ${rebaseIncentive.toString()} gwei
+        tx price estimation: ${txPrice.toString()} gwei
+      `);
     }
 
     const rebase = await StakingContract.rebase();
