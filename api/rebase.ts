@@ -38,7 +38,7 @@ const fetchCnvPriceGwei = () =>
     .then((d: any) => parseEther(d.concave.eth.toString()));
 
 export default async function (req: VercelRequest, res: VercelResponse) {
-  console.log(rebaser.address);
+  console.log("yo");
   try {
     const [rebaseIncentive, rebaseInterval, lastRebaseTime, block, gasPrice] =
       await Promise.all([
@@ -76,7 +76,7 @@ export default async function (req: VercelRequest, res: VercelResponse) {
     const incentiveValue = cnvPriceGwei.mul(+formatUnits(rebaseIncentive, 18));
     const txPrice = gasEstimation.mul(gasPrice);
 
-    if (txPrice.gt(incentiveValue)) {
+    if (txPrice.mul(0.75).gt(incentiveValue)) {
       await scheduleRebase(Date.now() / 1000 + 5 * 60);
       return res.status(200).send(`gass too high retrying in 5 min`);
     }
@@ -87,6 +87,7 @@ export default async function (req: VercelRequest, res: VercelResponse) {
       return res.status(200).send("rebase successful!");
     }
 
+    console.log(rebase);
     res.status(500).send(`rebase was not successful`);
   } catch (e) {
     console.log(e.message);
