@@ -2,6 +2,11 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { providers, Wallet, Contract } from "ethers";
 import { formatUnits, parseEther } from "ethers/lib/utils";
 import createFetch from "@vercel/fetch";
+import {
+  TransactionReceipt,
+  TransactionRequest,
+  TransactionResponse,
+} from "@ethersproject/abstract-provider";
 const fetch = createFetch();
 
 const concaveRPC = `https://rpc.concave.lol/v1/${process.env.CONCAVE_RPC_KEY}`;
@@ -87,8 +92,9 @@ export default async function (req: VercelRequest, res: VercelResponse) {
       `);
     }
 
-    const rebase = await StakingContract.rebase();
-    if (rebase === true) {
+    const rebase: TransactionResponse = await StakingContract.rebase();
+    const txResponse = await rebase.wait();
+    if (txResponse.status === 1) {
       await scheduleRebase(nextRebaseTime);
       return res.status(200).send("rebase successful!");
     }
