@@ -55,6 +55,7 @@ export default async function (req: VercelRequest, res: VercelResponse) {
       ]);
 
     const nextRebaseTime = lastRebaseTime.add(rebaseInterval);
+    await scheduleRebase(nextRebaseTime);
 
     // block time > next rebase time, we can rebase
     if (nextRebaseTime.gte(block.timestamp)) {
@@ -81,14 +82,14 @@ export default async function (req: VercelRequest, res: VercelResponse) {
     const incentiveValue = cnvPriceGwei.mul(+formatUnits(rebaseIncentive, 18));
     const txPrice = gasEstimation.mul(gasPrice);
 
-    if (txPrice.gt(incentiveValue)) {
+    if (txPrice.gt(incentiveValue.div(2))) {
       await scheduleRebase(Date.now() / 1000 + 5 * 60);
       return res.status(200).send(`
-        gas too high retrying in 5 min
-
-        CNV price: ${cnvPriceGwei.toString()} gwei
-        CNV rebase incentive: ${rebaseIncentive.toString()} gwei
-        tx price estimation: ${txPrice.toString()} gwei
+        gas too high retrying in 5 min <br/>
+        <br/>
+        cnv price:           ${cnvPriceGwei.toString()} gwei<br/>
+        incentive value:     ${incentiveValue.toString()} gwei<br/>
+        tx price estimation: ${txPrice.toString()} gwei<br/>
       `);
     }
 
