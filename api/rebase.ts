@@ -25,13 +25,14 @@ const StakingContract = new Contract(
   rebaser
 );
 
-const rebaseUrl = "https://concave-stake-rebase.vercel.app/api/rebase";
+const rebaseUrl = "https://concaver.vercel.app/api/rebase";
 const zeploKey = process.env.ZEPLO_KEY;
 
 const scheduleRebase = async (nextRebaseTimestamp) => {
-  // will retry 3 times spaced 5 secs on failed request
+  // will retry 3 times spaced 14 secs on failed request
+  if (process.env.NODE_ENV === "development") return;
   return fetch(
-    `https://zeplo.to/${rebaseUrl}?_delay_until=${nextRebaseTimestamp}&_retry=3|fixed|5&_token=${zeploKey}`
+    `https://zeplo.to/${rebaseUrl}?_delay_until=${nextRebaseTimestamp}&_retry=3|fixed|14&_token=${zeploKey}`
   );
 };
 
@@ -44,6 +45,7 @@ const fetchCnvPriceWei = () =>
 
 export default async function (req: VercelRequest, res: VercelResponse) {
   console.log("yo");
+
   try {
     const [rebaseIncentive, rebaseInterval, lastRebaseTime, block, gasPrice] =
       await Promise.all([
@@ -82,6 +84,7 @@ export default async function (req: VercelRequest, res: VercelResponse) {
     const txPrice = gasEstimation.mul(gasPrice);
 
     if (txPrice.gt(incentiveValue.div(2))) {
+      // 5 min
       await scheduleRebase(Date.now() / 1000 + 5 * 60);
       return res.status(200).send(`
         gas too high retrying in 5 min <br/>
