@@ -35,7 +35,7 @@ const scheduleRebase = async (nextRebaseTimestamp) => {
   );
 };
 
-const fetchCnvPriceGwei = () =>
+const fetchCnvPriceWei = () =>
   fetch(
     `https://api.coingecko.com/api/v3/simple/price?ids=concave&vs_currencies=eth`
   )
@@ -55,7 +55,6 @@ export default async function (req: VercelRequest, res: VercelResponse) {
       ]);
 
     const nextRebaseTime = lastRebaseTime.add(rebaseInterval);
-    await scheduleRebase(nextRebaseTime);
 
     // block time > next rebase time, we can rebase
     if (nextRebaseTime.gte(block.timestamp)) {
@@ -78,8 +77,8 @@ export default async function (req: VercelRequest, res: VercelResponse) {
     }
 
     const gasEstimation = await StakingContract.estimateGas.rebase();
-    const cnvPriceGwei = await fetchCnvPriceGwei();
-    const incentiveValue = cnvPriceGwei.mul(+formatUnits(rebaseIncentive, 18));
+    const cnvPriceWei = await fetchCnvPriceWei();
+    const incentiveValue = cnvPriceWei.mul(+formatUnits(rebaseIncentive, 18));
     const txPrice = gasEstimation.mul(gasPrice);
 
     if (txPrice.gt(incentiveValue.div(2))) {
@@ -87,9 +86,10 @@ export default async function (req: VercelRequest, res: VercelResponse) {
       return res.status(200).send(`
         gas too high retrying in 5 min <br/>
         <br/>
-        cnv price:           ${cnvPriceGwei.toString()} gwei<br/>
-        incentive value:     ${incentiveValue.toString()} gwei<br/>
-        tx price estimation: ${txPrice.toString()} gwei<br/>
+        cnv price:           ${formatUnits(cnvPriceWei, "gwei")} gwei<br/>
+        incentive value:     ${formatUnits(incentiveValue, "gwei")} gwei<br/>
+        tx price estimation: ${formatUnits(txPrice, "gwei")} gwei<br/>
+        gas price:           ${formatUnits(gasPrice, "gwei")} gwei<br/>
       `);
     }
 
